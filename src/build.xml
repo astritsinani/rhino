@@ -35,7 +35,8 @@ Requires Ant version 1.2
            debug="${debug}"
            includeAntRuntime="false"
            target="${target-jvm}"
-           source="${source-level}" />
+           source="${source-level}"
+           classpath="${jodatime.jar}" />
     <copy todir="${classes}">
       <fileset dir="src" includes="org/**/*.properties" />
       <filterset>

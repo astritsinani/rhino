@@ -192,7 +192,8 @@
              destdir="${dist.dir}/javadoc"
              version="true"
              author="true"
-             windowtitle="${Name}" />
+             windowtitle="${Name}"
+             classpath="${jodatime.jar}" />
   </target>
 
   <target name="dev-javadoc" depends="init">
