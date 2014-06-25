@@ -11,7 +11,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 import java.util.TimeZone;
-import java.util.SimpleTimeZone;
+
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 /**
  * This class implements the Date native object.
@@ -26,12 +28,8 @@ final class NativeDate extends IdScriptableObject
 
     private static final String js_NaN_date_str = "Invalid Date";
 
-    private static final DateFormat isoFormat;
-    static {
-      isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-      isoFormat.setTimeZone(new SimpleTimeZone(0, "UTC"));
-      isoFormat.setLenient(false);
-    }
+    private static final DateTimeFormatter isoFormatter = ISODateTimeFormat.dateTime().withZoneUTC();
+    private static final DateTimeFormatter isoParser = ISODateTimeFormat.dateTimeParser().withZoneUTC();
 
     static void init(Scriptable scope, boolean sealed)
     {
@@ -390,9 +388,7 @@ final class NativeDate extends IdScriptableObject
 
     private String toISOString() {
         if (date == date) {
-            synchronized (isoFormat) {
-                return isoFormat.format(new Date((long) date));
-            }
+            return isoFormatter.print((long) date);
         }
         String msg = ScriptRuntime.getMessage0("msg.invalid.date");
         throw ScriptRuntime.constructError("RangeError", msg);
@@ -786,14 +782,9 @@ final class NativeDate extends IdScriptableObject
     private static double date_parseString(String s)
     {
         try {
-          if (s.length() == 24) {
-              final Date d;
-              synchronized(isoFormat) {
-                  d = isoFormat.parse(s);
-              }
-              return d.getTime();
-          }
-        } catch (java.text.ParseException ex) {}
+            return isoParser.parseDateTime(s).toDate().getTime();
+        } catch (IllegalArgumentException ignored) {
+        }
 
         int year = -1;
         int mon = -1;
